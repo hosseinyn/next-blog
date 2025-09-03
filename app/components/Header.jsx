@@ -1,9 +1,17 @@
+"use client";
+
 import "../styles/Header.css";
 
 import Image from "next/image";
 import Link from "next/link";
 
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
+
 const Header = () => {
+
+  const { data: session , status } = useSession();
+
   return (
     <header>
       <nav className="bg-white px-4 lg:px-6 py-2.5">
@@ -21,18 +29,36 @@ const Header = () => {
             </span>
           </a>
           <div className="flex items-center lg:order-2">
-            <Link
-              href="/login"
-              className="text-gray-800 focus:ring-4 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 hover:bg-gray-700 focus:outline-none focus:ring-gray-800 duration-700 hover:text-white"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/signup"
-              className="text-white bg-gray-600 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 hover:bg-gray-800 focus:outline-none focus:ring-primary-800 duration-700"
-            >
-              Sign up
-            </Link>
+            {!session && <div>
+              <Link
+                href="/login"
+                className="text-gray-800 focus:ring-4 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 hover:bg-gray-700 focus:outline-none focus:ring-gray-800 duration-700 hover:text-white"
+              >
+                Log in
+              </Link>
+              <Link
+                href="/signup"
+                className="text-white bg-gray-600 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 hover:bg-gray-800 focus:outline-none focus:ring-primary-800 duration-700"
+              >
+                Sign up
+              </Link>
+            </div>}
+
+            {session && <div>
+              <button
+                onClick={signOut}
+                className="text-gray-800 focus:ring-4 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 hover:bg-gray-700 focus:outline-none focus:ring-gray-800 duration-700 hover:text-white cursor-pointer"
+              >
+                Sign out
+              </button>
+              <Link
+                href="/dashboard"
+                className="text-white bg-gray-600 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 hover:bg-gray-800 focus:outline-none focus:ring-primary-800 duration-700"
+              >
+                Dashboard
+              </Link>
+            </div>}
+
             <button
               data-collapse-toggle="mobile-menu-2"
               type="button"
