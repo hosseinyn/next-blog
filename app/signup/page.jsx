@@ -1,21 +1,77 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const page = () => {
+
+  const [registerError, setRegisterError] = useState("");
+  const [name , setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword , setConfirmPassword] = useState("");
+
+  const router = useRouter();
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+
+    if (password != confirmPassword) {
+        setRegisterError("Passwords don't match.");
+        return;
+    }
+
+    let response = await axios.post("/api/auth/signup" , {
+        name : name,
+        email : email,
+        password : password
+    })
+
+    if (response.data.message == "User created successfully") {
+        router.push("/login");
+    } else {
+        setRegisterError(response.data.message)
+    }
+
+  }
+
   return (
-    <section className="bg-white">
+    <section className="bg-white mt-10 mb-10">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
         <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-600 md:text-2xl text-center">
               Sign up to Next Blog !
             </h1>
-            <form className="space-y-4 md:space-y-6" action="#">
+            <form className="space-y-4 md:space-y-6" onSubmit={handleSignUp} >
+                <div>
+                <label
+                  htmlFor="name"
+                  className="block mb-2 text-sm font-medium text-gray-900"
+                >
+                  Name :
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 placeholder-gray-400 outline-none"
+                  placeholder="Enter the name..."
+                  onChange={(e) => setName(e.target.value)}
+                  minLength={"4"}
+                  maxLength={"10"}
+                  required
+                />
+              </div>
+
               <div>
                 <label
                   htmlFor="email"
                   className="block mb-2 text-sm font-medium text-gray-900"
                 >
-                  Email : 
+                  Email :
                 </label>
                 <input
                   type="email"
@@ -23,6 +79,7 @@ const page = () => {
                   id="email"
                   className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 placeholder-gray-400 outline-none"
                   placeholder="youremail@email.com"
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -31,7 +88,7 @@ const page = () => {
                   htmlFor="password"
                   className="block mb-2 text-sm font-medium text-gray-900"
                 >
-                  Password : 
+                  Password :
                 </label>
                 <input
                   type="password"
@@ -39,6 +96,8 @@ const page = () => {
                   id="password"
                   placeholder="Enter your password..."
                   className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 placeholder-gray-400 outline-none"
+                  onChange={(e) => setPassword(e.target.value)}
+                  minLength={"4"}
                   required
                 />
               </div>
@@ -47,7 +106,7 @@ const page = () => {
                   htmlFor="confirm_password"
                   className="block mb-2 text-sm font-medium text-gray-900"
                 >
-                  Confirm Password : 
+                  Confirm Password :
                 </label>
                 <input
                   type="password"
@@ -55,9 +114,12 @@ const page = () => {
                   id="confirm_password"
                   placeholder="Repeat your password..."
                   className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 placeholder-gray-400 outline-none"
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                 />
               </div>
+
+              {registerError != "" && <p className="text-red-600 mt-1">{registerError}</p>}
 
               <button
                 type="submit"
