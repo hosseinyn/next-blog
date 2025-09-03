@@ -4,8 +4,6 @@ import mongoose from 'mongoose';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
-console.log(process.env.MONGODB_URI)
-
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
