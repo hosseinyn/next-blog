@@ -14,7 +14,8 @@ const POST = async (req) => {
         const user = await User.create({
             name : data.name,
             email: data.email,
-            password: hashedPassword
+            password: hashedPassword,
+            is_verified: false
         })
 
         if (user) {

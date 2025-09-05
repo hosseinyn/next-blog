@@ -29,7 +29,7 @@ export default function RootLayout({ children }) {
       >
         <SessionProviderComponent><Header /></SessionProviderComponent>
 
-        {children}
+        <SessionProviderComponent>{children}</SessionProviderComponent>
 
         <Footer />
       </body>

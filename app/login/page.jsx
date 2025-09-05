@@ -4,6 +4,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios"
 
 const page = () => {
 
@@ -16,6 +17,18 @@ const page = () => {
   const handleLogin = async (e) => {
     e.preventDefault()
 
+    let is_verified_response = await axios.post("/api/verify/login" , {
+      email: email
+    })
+
+    if (is_verified_response.data.message == "not verified") {
+      setLoginError("Your account does not verified. Verify your account before login.");
+      return;
+    } else if (is_verified_response.data.message == "error") {
+      setLoginError("Email or password is not correct.");
+      return;
+    }
+
     const res = await signIn("credentials" , {
       redirect: false,
       email,
@@ -25,7 +38,7 @@ const page = () => {
     if (res.error === null) {
       router.push("/dashboard");
     } else {
-      setLoginError("Username or password is not correct.")
+      setLoginError("Email or password is not correct.")
     }
 
   }

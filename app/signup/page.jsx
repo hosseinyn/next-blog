@@ -30,7 +30,14 @@ const page = () => {
     })
 
     if (response.data.message == "User created successfully") {
-        router.push("/login");
+        let send_verify_link = await axios.post("/api/verify/signup" , {
+          email: email
+        })
+
+        if (send_verify_link.data.message == "sent"){
+          router.push("/verify");
+        }
+        
     } else {
         setRegisterError(response.data.message)
     }
