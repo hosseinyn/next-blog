@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import axios from "axios";
 
 const page = () => {
@@ -15,7 +15,7 @@ const page = () => {
 
   const [showVerify, setShowVerify] = useState(false);
 
-  const router = useRouter();
+  // const router = useRouter();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -47,7 +47,7 @@ const page = () => {
   return (
     <>
       {!showVerify && (
-        <section className="bg-white mt-10 mb-10">
+        <section className="bg-white mt-14 mb-14">
           <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
             <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0">
               <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
