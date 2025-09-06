@@ -10,6 +10,10 @@ const POST = async (req) => {
 
     const user = await User.findOne({ email });
 
+    if (user.is_verified) {
+      return new Response(JSON.stringify({ message: "sent" }), { status: 200 }); // hahahaha
+    }
+
     const token = crypto.randomBytes(32).toString("hex");
     user.verifyToken = token;
     user.verifyTokenExpiry = Date.now() + 14400000;

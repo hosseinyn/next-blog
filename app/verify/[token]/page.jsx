@@ -24,15 +24,20 @@ const page = () => {
 
   useEffect(() => {
     const handleCheckToken = async () => {
-      let response = await axios.post("/api/verify/check", {
-        token: params.token,
-      });
 
-      if (response.data.message == "Account verified successfully") {
-        setVerifyResult("success");
-      } else if (response.data.message == "Invalid or expired token") {
+      try {
+        let response = await axios.post("/api/verify/check", {
+          token: params.token,
+        });
+
+        if (response.data.message == "Account verified successfully") {
+          setVerifyResult("success");
+        }
+
+      } catch {
         setVerifyResult("fail");
       }
+
     };
 
     handleCheckToken();
@@ -89,13 +94,13 @@ const page = () => {
           )}
 
           {verifyResult == "fail" && (
-            <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0 gap-3 mt-1 mb-10">
+            <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0 gap-3 mt-7 mb-10">
               <a
                 href="https://www.flaticon.com/free-icons/delete"
                 title="delete icons"
               >
                 <Image
-                  src="/check.png"
+                  src="/fail.png"
                   width={100}
                   height={100}
                   alt="success"
@@ -110,7 +115,7 @@ const page = () => {
                 We can send another verify email.
               </p>
 
-              <form onSubmit={handleSendEmail}>
+              <form onSubmit={handleSendEmail} className="flex flex-col gap-3 mt-4">
                 <label htmlFor="email">Your email : </label>
                 <input
                   type="email"
@@ -125,7 +130,7 @@ const page = () => {
 
                 <button
                   type="submit"
-                  className="w-44 h-10 bg-gray-500 hover:bg-gray-600 rounded-xl text-white cursor-pointer duration-700 mt-1"
+                  className="w-32 self-center h-10 bg-gray-500 hover:bg-gray-600 rounded-xl text-white cursor-pointer duration-700 mt-1"
                 >
                   Send
                 </button>
