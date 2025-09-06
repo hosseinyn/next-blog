@@ -9,6 +9,18 @@ const POST = async (req) => {
 
     const hashedPassword = await bcrypt.hash(data.password, 10)
 
+    const email = data.email;
+    const name = data.name;
+
+    const check_user_exists_by_name = await User.findOne({ name });
+    const check_user_exists_by_email = await User.findOne({ email });
+
+    if (check_user_exists_by_name) {
+        return new Response(JSON.stringify({message : "This name is already exists."}) , { status: 200 });
+    } else if (check_user_exists_by_email) {
+        return new Response(JSON.stringify({message : "This email is already exists."}) , { status: 200 });
+    }
+
     try {
 
         const user = await User.create({
