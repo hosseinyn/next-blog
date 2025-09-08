@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-// import { useRouter } from "next/navigation";
+import { useState , useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import axios from "axios";
 
 const page = () => {
@@ -15,7 +16,18 @@ const page = () => {
 
   const [showVerify, setShowVerify] = useState(false);
 
-  // const router = useRouter();
+  const {data:session , status} = useSession();
+
+  const router = useRouter();
+
+
+  useEffect(() => {
+    if (session && status != "loading") {
+      router.push("/dashboard");
+    }
+  } , [session])
+
+
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -46,7 +58,12 @@ const page = () => {
 
   return (
     <>
-      {!showVerify && (
+      {status == "loading" && 
+        <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+          Loading...
+        </div>
+      }
+      {!showVerify && !session && status == "unauthenticated" && (
         <section className="bg-white mt-14 mb-14">
           <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
             <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0">
