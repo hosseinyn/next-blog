@@ -10,12 +10,15 @@ import {
   faThumbsUp,
   faSignOut,
   faTrash,
+  faPencil,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useEffect , useState } from "react";
+import Image from "next/image";
+import axios from "axios";
 
 const page = () => {
   const { data: session, status } = useSession();
@@ -32,6 +35,31 @@ const page = () => {
       router.push("/login");
     }
   }, [session]);
+
+  const [followers , setFollowers] = useState(0);
+  const [followings , setFollowings] = useState(0);
+
+  useEffect(() => {
+    const handleGetUserInfo = async () => {
+      try {
+        let response = await axios.post("/api/user/get-info" , {
+          name : session.user.name
+        });
+
+        setFollowers(response.data.followers_count);
+        setFollowings(response.data.followings_count);
+
+      } catch (e) {
+        console.log(e)
+
+      }
+
+    }
+
+    handleGetUserInfo();
+
+
+  } , []);
 
   return (
     <>
@@ -163,7 +191,42 @@ const page = () => {
             </div>
           </aside>
 
-          <div className="p-4 sm:ml-64">content</div>
+          <div className="p-4 sm:ml-64">
+            <div className="flex flex-row  justify-around items-center">
+
+              <div className="flex flex-row gap-7 items-center">
+                <a href="https://www.flaticon.com/free-icons/user-profiles" title="user profiles icons">
+                  <Image src={"/user.png"} width={100} height={300} alt="user profile" className="rounded-full" />
+                </a>
+
+                <div className="flex flex-col">
+                  <h3 className="text-4xl">{session.user.name}</h3>
+                  <h6>{session.user.email}</h6>
+                </div>
+
+              </div>
+
+              <div className="flex flex-row gap-7 items-center">
+                <Link href={"/followers"} className="text-gray-600">
+                  <FontAwesomeIcon icon={faUsers} /> {followers} Followers
+                </Link>
+
+                <Link href={"/followings"} className="text-gray-600">
+                  <FontAwesomeIcon icon={faUsers} /> {followings} Followings
+                </Link>
+
+
+                <Link href={"/edit"}>
+                  <button className="w-36 h-10 bg-gray-600 text-white hover:bg-gray-700 duration-700 cursor-pointer rounded-xl">
+                    Edit profile <FontAwesomeIcon icon={faPencil} />
+                  </button>
+                </Link>
+
+
+              </div>
+
+            </div>
+          </div>
         </>
       )}
     </>

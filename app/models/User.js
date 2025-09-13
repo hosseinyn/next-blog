@@ -5,6 +5,8 @@ const UserSchema = new mongoose.Schema(
     name: { type: String, required: true, unique: true },
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true },
+    followers_count: { type: Number , default: 0 },
+    followings_count: { type: Number , default: 0 },
     resetToken: { type: String, required: false },
     resetTokenExpiry: { type: Date, required: false },
     verifyToken: { type: String, required: false },
