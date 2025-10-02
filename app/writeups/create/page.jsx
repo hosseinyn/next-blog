@@ -1,6 +1,5 @@
 "use client";
 
-import "../styles/dashboard.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircleUser,
@@ -10,71 +9,62 @@ import {
   faThumbsUp,
   faSignOut,
   faTrash,
-  faPencil,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import axios from "axios";
-import Post from "../components/Post";
+import MDEditor from "@uiw/react-md-editor";
 
 const page = () => {
   const { data: session, status } = useSession();
 
   const router = useRouter();
 
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [text, setText] = useState("");
+  const [error, setError] = useState("");
+
   const handleLogout = () => {
     signOut();
     router.push("/");
   };
 
-  const [writeups, setWriteups] = useState([]);
-
   useEffect(() => {
     if (!session) {
       router.push("/login");
-    } else {
-      const handleGetWriteups = async () => {
-        try {
-          let response = await axios.post("/api/writeups/get", {
-            user_name: session.user.name,
-          });
-
-          if (response.data.message) {
-            console.log(response.data.message);
-            setWriteups(response.data.message);
-          }
-        } catch (e) {
-          console.log(e);
-        }
-      };
-
-      handleGetWriteups();
     }
   }, [session]);
 
-  const [followers, setFollowers] = useState(0);
-  const [followings, setFollowings] = useState(0);
+  const handleCreateWriteup = async (e) => {
+    e.preventDefault();
 
-  useEffect(() => {
-    const handleGetUserInfo = async () => {
-      try {
-        let response = await axios.post("/api/user/get-info", {
-          name: session.user.name,
-        });
+    try {
+      let response = await axios.post("/api/writeups/create", {
+        title: title,
+        description: description,
+        text: text,
+        user_name: session.user.name,
+        category: category,
+      });
 
-        setFollowers(response.data.followers_count);
-        setFollowings(response.data.followings_count);
-      } catch (e) {
-        console.log(e);
+      if (response.data.message == "Writeup created successfully") {
+        sleep(1700);
+        router.push("/dashboard");
+      } else if (response.data.message == "The category is not valid") {
+        setError("The category is not valid.");
       }
-    };
-
-    handleGetUserInfo();
-  }, []);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   return (
     <>
@@ -207,68 +197,102 @@ const page = () => {
           </aside>
 
           <div className="p-4 sm:ml-64">
-            <div className="flex flex-row  justify-around items-center">
-              <div className="flex flex-row gap-7 items-center">
-                <a
-                  href="https://www.flaticon.com/free-icons/user-profiles"
-                  title="user profiles icons"
-                >
-                  <Image
-                    src={"/user.png"}
-                    width={100}
-                    height={300}
-                    alt="user profile"
-                    className="rounded-full"
-                  />
-                </a>
+            <>
+              <h1 className="text-4xl text-center mt-3 mb-6">
+                Create a new writeup
+              </h1>
 
-                <div className="flex flex-col">
-                  <h3 className="text-4xl">{session.user.name}</h3>
-                  <h6>{session.user.email}</h6>
+              <form
+                className="mx-auto mt-1"
+                onSubmit={handleCreateWriteup}
+              >
+                <div className="mb-5">
+                  <label
+                    htmlFor="title"
+                    className="block mb-2 text-sm font-medium text-gray-900"
+                  >
+                    Writeup title
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    className="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:shadow-xs-light"
+                    min={"6"}
+                    max={"16"}
+                    placeholder="Enter writeup name"
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                  />
                 </div>
-              </div>
-
-              <div className="flex flex-row gap-7 items-center">
-                <Link href={"/followers"} className="text-gray-600">
-                  <FontAwesomeIcon icon={faUsers} /> {followers} Followers
-                </Link>
-
-                <Link href={"/followings"} className="text-gray-600">
-                  <FontAwesomeIcon icon={faUsers} /> {followings} Followings
-                </Link>
-
-                <Link href={"/edit"}>
-                  <button className="w-36 h-10 bg-gray-600 text-white hover:bg-gray-700 duration-700 cursor-pointer rounded-xl">
-                    Edit profile <FontAwesomeIcon icon={faPencil} />
-                  </button>
-                </Link>
-              </div>
-            </div>
-
-            <div className="mt-16 flex justify-end mr-10">
-              <Link href={"/writeups/create"}>
-                <button className="w-44 h-10 bg-gray-600 text-white hover:bg-gray-700 duration-700 cursor-pointer rounded-xl">
-                  Create a writeup <FontAwesomeIcon icon={faPencil} />
-                </button>
-              </Link>
-            </div>
-
-            <div className="flex flex-row gap-3 mt-6 justify-center flex-wrap">
-              {writeups.length > 0 ? (
-                writeups.map((item, key) => (
-                  <Post
-                    title={item.title}
-                    username={item.user_name}
-                    date={item.createdAt}
-                    description={item.description}
-                    category={item.category}
-                    key={key}
+                <div className="mb-5">
+                  <label
+                    htmlFor="description"
+                    className="block mb-2 text-sm font-medium text-gray-900"
+                  >
+                    Writeup description (min 100 characters and max 300
+                    characters)
+                  </label>
+                  <textarea
+                    id="description"
+                    className="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:shadow-xs-light"
+                    minLength={"100"}
+                    maxLength={"300"}
+                    placeholder="Enter writeup description"
+                    onChange={(e) => setDescription(e.target.value)}
+                    required
                   />
-                ))
-              ) : (
-                <p className="text-center mt-16 mb-16">No Writeups</p>
-              )}
-            </div>
+                </div>
+                <div className="mb-5">
+                  <label
+                    htmlFor="category"
+                    className="block mb-2 text-sm font-medium text-gray-900"
+                  >
+                    Writeup Category
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    id="category"
+                    className="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:shadow-xs-light"
+                  >
+                    <option value="">Select ...</option>
+                    <option value="Programming">Programming</option>
+                    <option value="Life">Life</option>
+                    <option value="Science">Science</option>
+                  </select>
+                </div>
+                <div className="mb-5">
+                  <label
+                    htmlFor="text"
+                    className="block mb-2 text-sm font-medium text-gray-900"
+                  >
+                    Writeup text (min 100 character)
+                  </label>
+
+                  <div className="container">
+                    <div data-color-mode="light">
+                      <MDEditor
+                        value={text || ""}
+                        onChange={setText}
+                        height={600}
+                        hideDragbar={true}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {error != "" && (
+                  <p className="mt-1 mb-3 text-red-600">{error}</p>
+                )}
+
+                <button
+                  type="submit"
+                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 w-44"
+                >
+                  Create
+                </button>
+              </form>
+            </>
           </div>
         </>
       )}
