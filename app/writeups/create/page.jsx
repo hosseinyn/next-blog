@@ -218,7 +218,7 @@ const page = () => {
                     id="title"
                     className="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:shadow-xs-light"
                     min={"6"}
-                    max={"16"}
+                    max={"18"}
                     placeholder="Enter writeup name"
                     onChange={(e) => setTitle(e.target.value)}
                     required

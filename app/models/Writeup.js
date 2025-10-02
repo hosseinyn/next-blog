@@ -7,6 +7,7 @@ const WriteUpSchema = new mongoose.Schema(
     text : { type: String , required: true },
     user_name : { type: String , required: true },
     category : { type: String , requried: true },
+    likes : { type: Number , required: true , default: 0 },
   },
   { timestamps: true }
 );
