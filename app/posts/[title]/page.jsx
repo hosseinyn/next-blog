@@ -17,6 +17,34 @@ const page = () => {
 
   useEffect(() => {
     if (!session) {
+    } else {
+
+      const handleGetFollowings = async () => {
+          try {
+            const response = await axios.post("/api/user/get-info/followings", {
+              name: session.user.name,
+            });
+      
+            if (response.data.followings) {
+              const followings = response.data.followings;
+
+              if(followings.some(item => item.user === session.user.name)) {
+                setIsFollowed(true);
+
+              } else {
+
+                setIsFollowed(false);
+
+              }
+
+            }
+          } catch (e) {
+            console.log(e);
+          }
+        };
+
+        handleGetFollowings();
+
     }
   }, [session]);
 
@@ -26,6 +54,7 @@ const page = () => {
   const [date, setDate] = useState("");
   const [likes, setLikes] = useState(0);
   const [category, setCategory] = useState("");
+  const [isFollowed , setIsFollowed] = useState(false);
 
   function formatDateOnly(timestamp) {
     const date = new Date(timestamp);
@@ -61,6 +90,40 @@ const page = () => {
     handleGetWriteupInformation();
   }, []);
 
+  const handleFollow = async () => {
+    try {
+      const response = await axios.post(
+        "/api/user/follow",
+        {
+          username: username,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.message == "Followed") {
+        setIsFollowed(true);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const handleUnfollow = async (name) => {
+      try {
+        const response = await axios.post("/api/user/unfollow", {
+          username: name,
+        });
+  
+        if ((response.data.message = "Unfollow")) {
+          setIsFollowed(false);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
   return (
     <div className="flex flex-col gap-3 p-3 mt-10 justify-center items-center">
       <h1 className="text-5xl text-center text-wrap">{title}</h1>
@@ -79,9 +142,32 @@ const page = () => {
           <h3 className="text-xl">{username}</h3>
         </Link>
 
-        <button className="w-20 h-10 border-gray-400 border-solid border hover:bg-gray-400 duration-700 rounded-full cursor-pointer">
-          Follow
-        </button>
+        
+        {session && session.user.name != username && !isFollowed && (
+          <button
+            onClick={handleFollow}
+            className="w-20 h-10 border-gray-400 border-solid border hover:bg-gray-400 duration-700 rounded-full cursor-pointer"
+          >
+            Follow
+          </button>
+        )}
+
+        {session && session.user.name != username && isFollowed && (
+          <button
+            onClick={() => handleUnfollow(username)}
+            className="w-20 h-10 border-gray-400 border-solid border hover:bg-gray-400 duration-700 rounded-full cursor-pointer"
+          >
+            Unfollow
+          </button>
+        )}
+
+        {!session && (
+          <Link href={"/login"}>
+            <button className="w-20 h-10 border-gray-400 border-solid border hover:bg-gray-400 duration-700 rounded-full cursor-pointer">
+              Follow
+            </button>
+          </Link>
+        )}
 
         <span>Published at : {date}</span>
 
