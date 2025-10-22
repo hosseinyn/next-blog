@@ -8,12 +8,18 @@ import axios from "axios";
 import Image from "next/image";
 import MDEditor from "@uiw/react-md-editor";
 import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faThumbsUp , faComment , faShare } from "@fortawesome/free-solid-svg-icons";
 
 const page = () => {
   const { data: session, status } = useSession();
 
   const params = useParams();
   const router = useRouter();
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
   useEffect(() => {
     if (!session) {
@@ -55,6 +61,7 @@ const page = () => {
   const [likes, setLikes] = useState(0);
   const [category, setCategory] = useState("");
   const [isFollowed , setIsFollowed] = useState(false);
+  const [isLiked , setIsLiked] = useState(false);
 
   function formatDateOnly(timestamp) {
     const date = new Date(timestamp);
@@ -88,7 +95,39 @@ const page = () => {
     };
 
     handleGetWriteupInformation();
+
   }, []);
+
+  useEffect(() => {
+
+    const handleCheckLike = async () => {
+      try {
+
+        const response = await axios.post("/api/writeups/check-like" , {
+          title: title
+        } , {
+          withCredentials: true
+        })
+
+        if (response.data.message == "liked") {
+          setIsLiked(true);
+
+        } else {
+
+          setIsLiked(false);
+          
+        }
+
+      } catch (e) {
+
+        console.log(e);
+
+      }
+    }
+
+    handleCheckLike();
+
+  } , [title])
 
   const handleFollow = async () => {
     try {
@@ -123,6 +162,49 @@ const page = () => {
         console.log(e);
       }
     };
+
+  
+  const handleLike = async () => {
+    try{
+
+      const response = await axios.post("/api/writeups/add-like" , {
+        title: title
+      } , {
+        withCredentials: true,
+      });
+
+      if (response.data.message == "done") {
+        setLikes(likes + 1)
+        setIsLiked(true)
+      }
+
+    } catch (e) {
+
+      console.log(e);
+
+    }
+  }
+
+  const handleDisLike = async () => {
+    try{
+
+      const response = await axios.post("/api/writeups/dislike" , {
+        title: title
+      } , {
+        withCredentials: true,
+      });
+
+      if (response.data.message == "done") {
+        setLikes(likes - 1)
+        setIsLiked(false)
+      }
+
+    } catch (e) {
+
+      console.log(e);
+
+    }
+  }
 
   return (
     <div className="flex flex-col gap-3 p-3 mt-10 justify-center items-center">
@@ -182,6 +264,32 @@ const page = () => {
           style={{ whiteSpace: "normal", fontSize: "16px", width: "100%" }}
           className="ms-1 text-left"
         />
+      </div>
+
+      <div className="flex flex-row mt-7 gap-6 items-center justify-center">
+        
+        {!isLiked && <div className="flex flex-col gap-2 items-center justify-center">
+          {session && username != session.user.name && <FontAwesomeIcon onClick={handleLike} className="cursor-pointer" icon={faThumbsUp} />}
+          {session && username == session.user.name && <FontAwesomeIcon icon={faThumbsUp} />}
+          {!session && <FontAwesomeIcon icon={faThumbsUp} />}
+          <span>Like {likes | 0}</span>
+        </div>}
+
+        {isLiked && session && username != session.user.name && <div className="flex flex-col gap-2 items-center justify-center">
+          <FontAwesomeIcon style={{color : "red"}} onClick={handleDisLike} className="cursor-pointer" icon={faThumbsUp} />
+          <span>Likes {likes | 0}</span>
+        </div>}
+        
+        <div className="flex flex-col gap-2 items-center justify-center">
+          <FontAwesomeIcon className="cursor-pointer" icon={faComment} />
+          <span>Comment</span>
+        </div>
+
+        <div className="flex flex-col gap-2 items-center justify-center">
+          <FontAwesomeIcon className="cursor-pointer" icon={faShare} />
+          <span>Share</span>
+        </div>
+
       </div>
 
       <br />
