@@ -1,6 +1,5 @@
 "use client";
 
-import "../styles/dashboard.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircleUser,
@@ -10,14 +9,11 @@ import {
   faThumbsUp,
   faSignOut,
   faTrash,
-  faPencil,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import axios from "axios";
 import Post from "../components/Post";
 
@@ -25,6 +21,16 @@ const page = () => {
   const { data: session, status } = useSession();
 
   const router = useRouter();
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [text, setText] = useState("");
+  const [error, setError] = useState("");
 
   const handleLogout = () => {
     signOut();
@@ -55,25 +61,28 @@ const page = () => {
     }
   }, [session]);
 
-  const [followers, setFollowers] = useState(0);
-  const [followings, setFollowings] = useState(0);
+  const handleCreateWriteup = async (e) => {
+    e.preventDefault();
 
-  useEffect(() => {
-    const handleGetUserInfo = async () => {
-      try {
-        let response = await axios.post("/api/user/get-info", {
-          name: session.user.name,
-        });
+    try {
+      let response = await axios.post("/api/writeups/create", {
+        title: title,
+        description: description,
+        text: text,
+        user_name: session.user.name,
+        category: category,
+      });
 
-        setFollowers(response.data.followers_count);
-        setFollowings(response.data.followings_count);
-      } catch (e) {
-        console.log(e);
+      if (response.data.message == "Writeup created successfully") {
+        sleep(1700);
+        router.push("/dashboard");
+      } else if (response.data.message == "The category is not valid") {
+        setError("The category is not valid.");
       }
-    };
-
-    handleGetUserInfo();
-  }, []);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   return (
     <>
@@ -206,51 +215,6 @@ const page = () => {
           </aside>
 
           <div className="p-4 sm:ml-64">
-            <div className="flex flex-row  justify-around items-center">
-              <div className="flex flex-row gap-7 items-center">
-                <a
-                  href="https://www.flaticon.com/free-icons/user-profiles"
-                  title="user profiles icons"
-                >
-                  <Image
-                    src={"/user.png"}
-                    width={100}
-                    height={300}
-                    alt="user profile"
-                    className="rounded-full"
-                  />
-                </a>
-
-                <div className="flex flex-col">
-                  <h3 className="text-4xl">{session.user.name}</h3>
-                  <h6>{session.user.email}</h6>
-                </div>
-              </div>
-
-              <div className="flex flex-row gap-7 items-center">
-                <Link href={"/followers"} className="text-gray-600">
-                  <FontAwesomeIcon icon={faUsers} /> {followers} Followers
-                </Link>
-
-                <Link href={"/followings"} className="text-gray-600">
-                  <FontAwesomeIcon icon={faUsers} /> {followings} Followings
-                </Link>
-
-                <Link href={"/edit"}>
-                  <button className="w-36 h-10 bg-gray-600 text-white hover:bg-gray-700 duration-700 cursor-pointer rounded-xl">
-                    Edit profile <FontAwesomeIcon icon={faPencil} />
-                  </button>
-                </Link>
-              </div>
-            </div>
-
-            <div className="mt-16 flex justify-end mr-10">
-              <Link href={"/writeups/create"}>
-                <button className="w-44 h-10 bg-gray-600 text-white hover:bg-gray-700 duration-700 cursor-pointer rounded-xl">
-                  Create a writeup <FontAwesomeIcon icon={faPencil} />
-                </button>
-              </Link>
-            </div>
 
             <div className="flex flex-row gap-3 mt-6 justify-center flex-wrap">
               {writeups.length > 0 ? (
@@ -268,6 +232,7 @@ const page = () => {
                 <p className="text-center mt-16 mb-16">No Writeups</p>
               )}
             </div>
+            
           </div>
         </>
       )}

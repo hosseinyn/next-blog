@@ -2,17 +2,23 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import Post from "./components/Post";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import Post from "../../components/Post";
 
 export default function Home() {
   const [writeups, setWriteups] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const params = useParams();
+
   useEffect(() => {
     const handleGetWriteups = async () => {
+    const decoded_category = decodeURIComponent(params.name);
       try {
-        const response = await axios.get("/api/writeups/get/all");
+        const response = await axios.post("/api/writeups/get/category" , {
+            category : decoded_category
+        });
 
         setWriteups(response.data.message);
       } catch (e) {
